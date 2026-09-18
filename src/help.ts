@@ -103,7 +103,7 @@ export const COMMAND_HELP: Record<string, string> = {
   account: `docparse account <list|add|remove|test>\n` +
     `管理解析账号池；池内账号按「在途少 → 最久未用 → 权重高」自动负载均衡，失效账号自动冷却。`,
   skills: `docparse skills <status|install|update> [--target codex,claude,...] [--skills-root 目录]\n` +
-    `把内置 skill（SKILL.md 与 references/ 整套）安装到 AI Agent 的 skills 目录；默认 codex 目标即 ~/.agents/skills/docparse。`,
+    `把内置 skill（SKILL.md 与 references/ 整套）安装到 AI Agent 的 skills 目录；默认 codex 目标即 ~/.agents/skills/document-parsing。`,
   quota: `docparse quota [--name <账号>]\n` +
     `查询账号的今日额度与累计用量（GET /api/v4/extract/status，不消耗解析额度）；默认查账号池全部可用账号。\n` +
     `pages_today / files_today 是「今日已用/上限」；页数上限即官方说的最高优先级解析额度，用完后当天仍可解析、只是优先级降低。`,

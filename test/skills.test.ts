@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, it } from "node:test";
 
 import { ArgsError } from "../src/errors.js";
+import { COMMAND_HELP, USAGE } from "../src/help.js";
 import { SKILL_TARGETS, bundledSkillFiles, installSkill, parseTargets, skillStatus } from "../src/skills.js";
 
 /** 直接从仓库里的内置资产读取期望内容，不经被测模块。 */
@@ -212,5 +213,21 @@ describe("内置 skill 资产布局", () => {
       .filter((relative) => relative.startsWith("references/") && !relative.endsWith("-zh.md"))
       .filter((relative) => !entry.includes(relative));
     assert.deepEqual(orphans, []);
+  });
+});
+
+describe("skill 命名", () => {
+  it("SKILL.md 的 name 与安装目录同名", () => {
+    // oracle: specified（名称即项目名去掉 cli，不用缩写）
+    assert.match(asset("SKILL.md"), /^name: document-parsing$/m);
+    const action = installSkill({ targets: parseTargets("codex"), home: tmpHome })[0];
+    assert.ok(action);
+    assert.equal(path.basename(path.dirname(action.path)), "document-parsing");
+  });
+
+  it("帮助文本里的安装路径与安装目录同名", () => {
+    // oracle: derived（帮助是运行时权威，路径写错会把用户引到不存在的目录）
+    assert.match(COMMAND_HELP.skills ?? "", /\.agents[/\\]skills[/\\]document-parsing/);
+    assert.doesNotMatch(USAGE, /\.agents[/\\]skills[/\\]docparse(?![-a-z])/);
   });
 });
