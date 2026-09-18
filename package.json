@@ -1,0 +1,48 @@
+{
+  "name": "docparse-cli",
+  "version": "0.1.10",
+  "description": "Document to Markdown CLI for AI agents, built on the MinerU parsing API. Multi-account key pool with automatic load balancing; prints the path of the parsed Markdown instead of its content.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "docparse": "dist/cli.js"
+  },
+  "files": [
+    "dist/",
+    "skills/",
+    "README.md",
+    "README-ZH.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.17"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "keywords": [
+    "mineru",
+    "markdown",
+    "pdf",
+    "ocr",
+    "document-parsing",
+    "cli",
+    "ai-agent"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json",
+    "test": "node --import tsx --test test/*.test.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "fflate": "^0.8.3",
+    "smol-toml": "^1.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.3",
+    "tsx": "^4.23.13",
+    "typescript": "^5.9.3"
+  }
+}
