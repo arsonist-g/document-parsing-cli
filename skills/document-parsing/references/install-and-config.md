@@ -104,7 +104,7 @@ Every command here also accepts `--output json`.
 | `config init` | Writes a commented template. | `--force` | Without `--force` an existing file is left alone. |
 | `config set` | Changes one key. | `<key> <value>` | Rejects a key outside the table above with exit 2. |
 | `account list` | Prints the pool, with cooldown state. | | |
-| `account add` | Adds an account. | `--token <token>`, `--name <name>`, `--base-url <url>`, `--weight <n>` | Repeat it to build a pool. |
+| `account add` | Adds an account. | `--token <token>`, `--name <name>`, `--base-url <url>`, `--weight <n>` | Repeat it to build a pool. Here `--base-url` is written into that account's record, so the account keeps its own upstream; the global flag of the same name covers one call only. |
 | `account remove` | Removes an account. | `<name-or-index>*` | |
 | `account test` | Probes credentials without spending allowance. | `--name <name>` | Exit 5 when a credential is rejected. |
 | `quota` | Prints today's pages and files as used over allowance, plus cumulative usage per account. | `--name <name>` | Reads the vendor's own counters. The remaining page count is in `--output json` under `daily.left`. A zero `total_left` means the free balance is spent, which does not block parsing. |

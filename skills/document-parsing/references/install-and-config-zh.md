@@ -104,7 +104,7 @@ headers = { Authorization = "Bearer ${token}" }
 | `config init` | 写出带注释的模板。 | `--force` | 不带 `--force` 时已有的文件保持不动。 |
 | `config set` | 修改单个键。 | `<key> <value>` | 键不在上表内时报退出码 2。 |
 | `account list` | 打印账号池与冷却状态。 | | |
-| `account add` | 添加账号。 | `--token <token>`、`--name <name>`、`--base-url <url>`、`--weight <n>` | 多跑几次即可组成账号池。 |
+| `account add` | 添加账号。 | `--token <token>`、`--name <name>`、`--base-url <url>`、`--weight <n>` | 多跑几次即可组成账号池。这里的 `--base-url` 会写进该账号的记录，让这个账号长期用自己的上游；同名的全局参数只覆盖一次调用。 |
 | `account remove` | 删除账号。 | `<name-or-index>*` | |
 | `account test` | 探活凭证，不花额度。 | `--name <name>` | 凭证被拒时退出码 5。 |
 | `quota` | 按账号打印今日页数与文件数的「已用/上限」，以及累计用量。 | `--name <name>` | 读的是厂商自己的计数器。剩余页数在 `--output json` 的 `daily.left` 里。`total_left` 为 0 意味着免费额度已用尽，它不阻塞解析。 |

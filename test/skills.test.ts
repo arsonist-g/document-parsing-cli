@@ -231,3 +231,14 @@ describe("skill 命名", () => {
     assert.doesNotMatch(USAGE, /\.agents[/\\]skills[/\\]docparse(?![-a-z])/);
   });
 });
+
+describe("批次续查的文案", () => {
+  it("入口与错误参考的中英两侧都指明续查命令", () => {
+    // oracle: derived（回归：英文 errors.md 曾漏改，仍称 batch_id 无法续查）
+    for (const relative of ["SKILL.md", "skill-zh.md", "references/errors.md", "references/errors-zh.md"]) {
+      const text = asset(relative);
+      assert.match(text, /docparse batch <batch_id>/, relative);
+      assert.doesNotMatch(text, /cannot be re-queried|无法续查/, relative);
+    }
+  });
+});

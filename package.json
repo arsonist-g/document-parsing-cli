@@ -1,6 +1,6 @@
 {
   "name": "docparse-cli",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "Document to Markdown CLI for AI agents, built on the MinerU parsing API. Multi-account key pool with automatic load balancing; prints the path of the parsed Markdown instead of its content.",
   "license": "MIT",
   "type": "module",

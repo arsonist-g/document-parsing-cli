@@ -103,7 +103,7 @@ docparse parse ./papers/a.pdf ./papers/b.pdf --pages "1-20" --out ./markdown
 
 | 分组 | 命令 |
 |---|---|
-| 解析 | `parse`、`flash`、`task` |
+| 解析 | `parse`、`flash`、`task`、`batch` |
 | 安装与管理 | `config`、`account`、`quota`、`skills`、`doctor`，全部记录在 `references/install-and-config.md` |
 
 ### 解析
@@ -124,7 +124,7 @@ docparse parse ./papers/a.pdf ./papers/b.pdf --pages "1-20" --out ./markdown
 - `<slug>` 从来源名生成：文件名去掉扩展名，来源是 URL 时是主机名加最后一段路径。`A-Za-z0-9-` 之外的每个字符都变成 `-`，结果截到 48 个字符，剩下的内容不可用时取名 `document`。
 - `--out DIR` 只替换 `tmp-doc/<日期>` 这一段，所以 `--out ./docs` 写出 `./docs/parse-report-.../report.md`。
 - 已存在的名字绝不覆盖：撞名时先追加 `-1`，再追加 `-2`。
-- `--output json` 把同样的结果包成一个对象：失败的文档没有 `md_path`，`error` 只在失败时出现。
+- `--output json` 把同样的结果包成一个对象：失败的文档没有 `md_path`，`error` 只在失败时出现。这个对象在调用真的到达服务之后才出现：还没开始就被拒的输入（例如本地文件不存在）以退出码 2 结束，只在 stderr 留一行 `error:`，没有 JSON。
 
 ## 红线
 
@@ -143,6 +143,6 @@ docparse parse ./papers/a.pdf ./papers/b.pdf --pages "1-20" --out ./markdown
 | `-60008` | 厂商取不到你的 URL。 | 先把文件下下来，改传本地路径。 |
 | `-30001`、`-30003` | 输入超出了 `flash` 的上限。 | 用 `parse` 转换这份文档。 |
 | `-60018` | 厂商拒绝了这次调用：当日页数额度已用完。 | 账号池会把该账号停用到次日，所以今天用它重试不会成功。换一个账号仍然可用，`docparse quota` 会报告还剩多少。 |
-| 其余任何码 | 厂商给了一个工具没有释义的码。 | 保留消息原样，没有理由就不要重新提交该文档。这次调用以退出码 6 结束。 |
+| 其余任何码 | 厂商给了一个工具没有释义的码。 | 保留消息原样，没有理由就不要重新提交该文档。`references/errors.md` 里列出的码不归这一行管：以那张表的「重试」列为准。这次调用以退出码 6 结束。 |
 
 其余的码、各自的含义，以及哪些失败值得重试，都在 `references/errors.md`。

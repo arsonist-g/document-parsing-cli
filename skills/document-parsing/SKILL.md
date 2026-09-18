@@ -101,7 +101,7 @@ The tool groups its commands as its own help does. Marking: `<x>` a required pos
 
 | Group | Commands |
 |---|---|
-| Parsing | `parse`, `flash`, `task` |
+| Parsing | `parse`, `flash`, `task`, `batch` |
 | Setup and administration | `config`, `account`, `quota`, `skills`, `doctor`, all documented in `references/install-and-config.md` |
 
 ### Parsing
@@ -122,7 +122,7 @@ The parsing defaults come from the config: `vlm`, `ch`, OCR off, formula and tab
 - `<slug>` comes from the source name: the file name without its extension, or the host plus the last path segment for a URL. Every character outside `A-Za-z0-9-` becomes `-`, the result is cut to 48 characters, and a name with nothing usable left becomes `document`.
 - `--out DIR` replaces the `tmp-doc/<date>` part only, so `--out ./docs` writes `./docs/parse-report-.../report.md`.
 - An existing name is never overwritten: a collision appends `-1`, then `-2`.
-- `--output json` wraps the same results in one object, with `md_path` absent for a document that failed, and `error` present only on failure.
+- `--output json` wraps the same results in one object, with `md_path` absent for a document that failed, and `error` present only on failure. That object appears once the call reaches the service: an input rejected before it starts, such as a missing local file, exits 2 with a plain `error:` line and no JSON.
 
 ## Red lines
 
@@ -141,6 +141,6 @@ The parsing defaults come from the config: `vlm`, `ch`, OCR off, formula and tab
 | `-60008` | The vendor could not fetch your URL. | Download the file and pass a local path instead. |
 | `-30001`, `-30003` | The input exceeds a `flash` limit. | Convert that document with `parse`. |
 | `-60018` | The vendor refused the call: the daily page allowance is spent. | The pool parks that account until the next day, so a retry today does not go through on it. Another account still works, and `docparse quota` reports what is left. |
-| any other code | The vendor sent a code the tool carries no hint for. | Keep the message as it is, and do not resubmit the document without a reason. The call exits 6. |
+| any other code | The vendor sent a code the tool carries no hint for. | Keep the message as it is, and do not resubmit the document without a reason. A code that `references/errors.md` lists is not this row's business: that table's retry column governs. The call exits 6. |
 
 The remaining codes, what each means, and which failures are worth retrying are in `references/errors.md`.

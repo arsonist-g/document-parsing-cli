@@ -14,7 +14,7 @@ A failure prints one line to stderr, `error: <message>`, and sets the process ex
 | 3 | configuration | The config file, or a check in `doctor`, is wrong. | Run `docparse config show` and `docparse doctor`. |
 | 4 | network | The upstream could not be reached. | Retry once. If it repeats, check the network path to `base_url`. |
 | 5 | account | Every account in the pool was rejected, or none is configured (`parse` reports an empty pool this way; `task` with no account exits 2). | Run `docparse account test`, then fix the credential. Retrying changes nothing. |
-| 6 | upstream | The document failed, the submission failed, or the wait timed out. | Keep the `task_id` from the message and re-query it with `docparse task <task_id>`. A `batch_id` cannot be re-queried: no command accepts one. Do not resubmit the document. |
+| 6 | upstream | The document failed, the submission failed, or the wait timed out. | Keep the `task_id` from the message and re-query it with `docparse task <task_id>`, or the `batch_id` with `docparse batch <batch_id>`. Do not resubmit the document. |
 | 7 | partial | Some documents in the call succeeded. | The paths already printed stay valid. Re-submit only the inputs that failed. |
 
 ## Upstream codes
