@@ -21,7 +21,7 @@ This skill converts documents and hands back file paths. It does not:
 - Sentences with "must", "do not", or "never" are rules. Tables, fenced blocks, and text marked "example" are reference.
 - `references/install-and-config.md` holds install, credentials, `base_url`, the configuration keys, and the administrative commands. Load it on first use, or when a credential, an upstream address, or a pool setting changes.
 - `references/errors.md` holds the upstream codes the tool has a hint for, the exit codes, and which failures are worth retrying. Load it when a call fails with a code you do not recognize.
-- Not all three files load at once: this entry, plus whichever of the two references the task needs. The common path is this entry alone.
+- Not all three files load at once: this entry, plus whichever of the two references the task needs. The common path, a conversion on a machine that is already set up, is this entry alone.
 - Each file has a Chinese twin beside it, `skill-zh.md` for this entry and `references/<name>-zh.md` for the rest: translations kept for human proofreading. The English file is the one in force.
 
 ## Supported inputs
@@ -109,7 +109,7 @@ The tool groups its commands as its own help does. Marking: `<x>` a required pos
 | Command | Description | Parameters | Notes |
 |---|---|---|---|
 | `parse` | Converts local files or URLs through the precise channel and writes the result to disk. | `<file-or-url>*` `--model <pipeline \| vlm \| MinerU-HTML>` `--language <code>` `--pages <range>` `--ocr` `--no-ocr` `--formula` `--no-formula` `--table` `--no-table` `--extra-formats <list>` `--out <dir>` `--no-wait` | One absolute Markdown path per document on stdout. `--pages` takes the vendor grammar, example `"2,4-6"`. `--extra-formats` is a comma separated subset of `docx`, `html`, `latex`, and does nothing for an HTML source. `--no-wait` prints a `batch_id` and returns at once; resume it with `docparse batch <batch_id>`. |
-| `flash` | Converts one small input through the token-free channel. | `<file-or-url>` `--model <pipeline \| vlm \| MinerU-HTML>` `--language <code>` `--pages <range>` `--ocr` `--no-ocr` `--formula` `--no-formula` `--table` `--no-table` `--out <dir>` | Exactly one input: a second one is an error, so batch through `parse`. `--pages` accepts only `"1-10"` or a single page, and the vendor rejects a richer range. `--extra-formats` is accepted but does nothing here. The whole output is one Markdown file. |
+| `flash` | Converts one small input through the token-free channel. | `<file-or-url>` `--model <pipeline \| vlm \| MinerU-HTML>` `--language <code>` `--pages <range>` `--ocr` `--no-ocr` `--formula` `--no-formula` `--table` `--no-table` `--extra-formats <list>` `--out <dir>` | Exactly one input: a second one is an error, so batch through `parse`. `--pages` accepts only `"1-10"` or a single page, and the vendor rejects a richer range. `--extra-formats` is accepted but does nothing here. The whole output is one Markdown file. |
 | `task` | Reports a precise-channel task and optionally fetches its result. | `<task-id>` `--download` `--wait` `--out <dir>` `--slug <name>` | Without `--download` it prints `<task_id> <state>`. One id only: a second one is ignored rather than refused. The task belongs to the account that submitted it, so the command searches the pool for a matching one. |
 | `batch` | Reports a batch by its `batch_id` and optionally fetches what is finished. | `<batch-id>` `--download` `--wait` `--out <dir>` `--slug <name>` | Without `--download` it prints `<file name> <state>` per document. `--wait` polls until every document settles. `--slug` applies to a single-document batch only. The batch belongs to the account that submitted it, so the command searches the pool. |
 
@@ -135,12 +135,12 @@ The parsing defaults come from the config: `vlm`, `ch`, OCR off, formula and tab
 
 | Code | Meaning | Action |
 |---|---|---|
-| exit 5 | Every account was rejected. | Verify or replace the credential with `docparse account test`. Retrying the same call changes nothing. |
+| exit 5 | Every account was rejected, or none is configured. | Verify or replace the credential with `docparse account test`, and add a missing one with `docparse account add`. Retrying the same call changes nothing. |
 | exit 6 | The upstream failed, or the wait timed out. | The message carries the vendor's reason, and its code when the vendor sent one. A `task_id` is re-queried with `docparse task <task_id>`, and a `batch_id` with `docparse batch <batch_id>`. Do not resubmit the document. |
 | exit 7 | Some documents succeeded. | The paths already printed stay valid. Re-submit only the inputs that failed. |
 | `-60008` | The vendor could not fetch your URL. | Download the file and pass a local path instead. |
 | `-30001`, `-30003` | The input exceeds a `flash` limit. | Convert that document with `parse`. |
-| `-60018` | The vendor refused the call: the daily page allowance is spent. | The pool parks that account until the next day, so a retry today does not go through on it. Another account still works, and `docparse quota` reports what is left. |
+| `-60018` | The vendor refused the call: the daily page allowance is spent. | The pool parks that account until the next day, so it is not selected again today. Another account still works, and `docparse quota` reports what is left. |
 | any other code | The vendor sent a code the tool carries no hint for. | Keep the message as it is, and do not resubmit the document without a reason. A code that `references/errors.md` lists is not this row's business: that table's retry column governs. The call exits 6. |
 
 The remaining codes, what each means, and which failures are worth retrying are in `references/errors.md`.

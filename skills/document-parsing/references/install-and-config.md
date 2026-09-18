@@ -1,6 +1,6 @@
 # Install and configuration
 
-Load this file on first use, or when a credential, an upstream address, a pool setting, or the skill installation changes. The common path needs none of it.
+Load this file when you set the tool up for the first time, or when a credential, an upstream address, a pool setting, or the skill installation changes. A machine that is already set up needs none of it.
 
 ## Install
 

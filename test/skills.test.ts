@@ -242,3 +242,25 @@ describe("批次续查的文案", () => {
     }
   });
 });
+
+describe("解析命令表的自洽", () => {
+  const ROWS = ["parse", "flash", "task", "batch"];
+
+  it("每一行备注里提到的 flag 都在该行的参数列里", () => {
+    // oracle: derived（回归：flash 的备注说 --extra-formats 收得下，参数列却漏了它）
+    const section = (asset("SKILL.md").split("### Parsing")[1] ?? "").split("\n").slice(1);
+    const end = section.findIndex((line) => line.startsWith("## "));
+    const lines = section
+      .slice(0, end === -1 ? undefined : end)
+      .filter((line) => ROWS.some((command) => line.startsWith(`| \`${command}\` |`)));
+    assert.equal(lines.length, ROWS.length);
+    for (const line of lines) {
+      const cells = line.split(/(?<!\\)\|/).map((cell) => cell.trim());
+      const params = cells[3] ?? "";
+      const notes = cells[4] ?? "";
+      for (const [, flag] of notes.matchAll(/`(--[a-z][a-z-]*)/g)) {
+        assert.ok(params.includes(flag), `${line.split("|")[1]?.trim()} 的参数列缺少 ${flag}`);
+      }
+    }
+  });
+});

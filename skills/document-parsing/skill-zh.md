@@ -21,9 +21,9 @@ description: 把文档转成 Markdown，支持 PDF、扫描图像（png、jpg、
 ## 怎么读此 skill
 
 - 带「必须」「不要」「绝不」的句子是规则。表格、围栏代码块、标注为「示例」的文字是参考。
-- `references/install-and-config.md` 承载安装、凭证、`base_url`、配置项与管理类命令。首次使用时加载它，或当某个凭证、某个上游地址、某个账号池设置发生变化时加载。
+- `references/install-and-config.md` 承载安装、凭证、`base_url`、配置项与管理类命令。第一次把工具装起来时加载它，或当某个凭证、某个上游地址、某个账号池设置发生变化时加载。
 - `references/errors.md` 承载工具带有释义的上游错误码、退出码，以及哪些失败值得重试。当一次调用以你不认识的错误码失败时加载它。
-- 三个文件不会同时加载：本入口，加上任务需要的那一两份 reference。常见路径只需要本入口文件。
+- 三个文件不会同时加载：本入口，加上任务需要的那一两份 reference。常见路径（在已经配置好的机器上做一次转换）只需要本入口文件。
 - 每个文件旁边都有一个中文孪生版本，本入口是 `skill-zh.md`，其余是 `references/<名字>-zh.md`：留着供人校对的翻译。生效的是英文文件。
 
 ## 支持的输入
@@ -111,7 +111,7 @@ docparse parse ./papers/a.pdf ./papers/b.pdf --pages "1-20" --out ./markdown
 | 命令 | 描述 | 参数 | 备注 |
 |---|---|---|---|
 | `parse` | 通过精准解析通道转换本地文件或 URL，并把结果写到磁盘。 | `<file-or-url>*` `--model <pipeline \| vlm \| MinerU-HTML>` `--language <code>` `--pages <range>` `--ocr` `--no-ocr` `--formula` `--no-formula` `--table` `--no-table` `--extra-formats <list>` `--out <dir>` `--no-wait` | stdout 上每份文档一个 Markdown 绝对路径。`--pages` 用厂商语法，示例 `"2,4-6"`。`--extra-formats` 是 `docx`、`html`、`latex` 的逗号分隔子集，对 HTML 来源不起作用。`--no-wait` 打印一个 `batch_id` 并立即返回，之后用 `docparse batch <batch_id>` 续查。 |
-| `flash` | 通过免 Token 通道转换一个小输入。 | `<file-or-url>` `--model <pipeline \| vlm \| MinerU-HTML>` `--language <code>` `--pages <range>` `--ocr` `--no-ocr` `--formula` `--no-formula` `--table` `--no-table` `--out <dir>` | 恰好一个输入：再给一个就是错误，批量请走 `parse`。`--pages` 只接受 `"1-10"` 或单独一页，更复杂的范围由厂商拒绝。`--extra-formats` 收得下，但在这里不产生作用。产物就是一个 Markdown 文件。 |
+| `flash` | 通过免 Token 通道转换一个小输入。 | `<file-or-url>` `--model <pipeline \| vlm \| MinerU-HTML>` `--language <code>` `--pages <range>` `--ocr` `--no-ocr` `--formula` `--no-formula` `--table` `--no-table` `--extra-formats <list>` `--out <dir>` | 恰好一个输入：再给一个就是错误，批量请走 `parse`。`--pages` 只接受 `"1-10"` 或单独一页，更复杂的范围由厂商拒绝。`--extra-formats` 收得下，但在这里不产生作用。产物就是一个 Markdown 文件。 |
 | `task` | 报告一个精准解析任务，并可选地取回结果。 | `<task-id>` `--download` `--wait` `--out <dir>` `--slug <name>` | 不带 `--download` 时打印 `<task_id> <state>`。只用一个 id：再给一个会被忽略，而不是报错。任务归属于提交它的账号，所以命令会在账号池里找一个匹配的。 |
 | `batch` | 按 `batch_id` 查询一次批量任务，并可选地取回已完成的部分。 | `<batch-id>` `--download` `--wait` `--out <dir>` `--slug <name>` | 不带 `--download` 时每份文档打印一行 `<文件名> <状态>`。`--wait` 轮询到每份文档都进入终态。`--slug` 只对单文档批次有效。批次归属于提交它的账号，所以命令会在账号池里找一个匹配的。 |
 
@@ -137,12 +137,12 @@ docparse parse ./papers/a.pdf ./papers/b.pdf --pages "1-20" --out ./markdown
 
 | 码 | 含义 | 处置 |
 |---|---|---|
-| 退出码 5 | 每个账号都被拒绝。 | 用 `docparse account test` 核实或更换凭证。重试同一次调用不会改变结果。 |
+| 退出码 5 | 每个账号都被拒绝，或一个账号都没配。 | 用 `docparse account test` 核实或更换凭证，缺账号时用 `docparse account add` 补一个。重试同一次调用不会改变结果。 |
 | 退出码 6 | 上游失败，或等待超时。 | 消息里带着厂商给的原因，厂商给了错误码时也带着码。`task_id` 用 `docparse task <task_id>` 重新查询；`batch_id` 用 `docparse batch <batch_id>` 重新查询。不要重新提交文档。 |
 | 退出码 7 | 部分文档成功。 | 已经打印的路径依然有效。只重新提交失败的那些输入。 |
 | `-60008` | 厂商取不到你的 URL。 | 先把文件下下来，改传本地路径。 |
 | `-30001`、`-30003` | 输入超出了 `flash` 的上限。 | 用 `parse` 转换这份文档。 |
-| `-60018` | 厂商拒绝了这次调用：当日页数额度已用完。 | 账号池会把该账号停用到次日，所以今天用它重试不会成功。换一个账号仍然可用，`docparse quota` 会报告还剩多少。 |
+| `-60018` | 厂商拒绝了这次调用：当日页数额度已用完。 | 账号池会把该账号停用到次日，所以今天不会再选它。换一个账号仍然可用，`docparse quota` 会报告还剩多少。 |
 | 其余任何码 | 厂商给了一个工具没有释义的码。 | 保留消息原样，没有理由就不要重新提交该文档。`references/errors.md` 里列出的码不归这一行管：以那张表的「重试」列为准。这次调用以退出码 6 结束。 |
 
 其余的码、各自的含义，以及哪些失败值得重试，都在 `references/errors.md`。
