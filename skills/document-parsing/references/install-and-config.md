@@ -51,7 +51,7 @@ docparse parse ./report.pdf --token <TOKEN>                   # this call only
 
 The second way sets `DOCPARSE_TOKEN` in the calling environment before the call; it is how a caller passes a token without writing it into a file. How an environment variable is set is the shell's business, and the table below lists the rest.
 
-Add several accounts and calls spread across them: fewest in flight first, then the account idle longest, then the higher `weight`. An account that fails is cooled down and skipped: 24 hours for a rejected or expired token (`A0202`, `A0211`), until the next day once the daily allowance is spent (`-60018`), and briefly for throttling or upstream trouble. Cooldown state is in `~/.docparse/state.json`, keyed by a hash of the credential and never by the credential itself.
+Add several accounts and calls spread across them: fewest in flight first, then the largest idle time multiplied by `weight`, so an account that was never used leads and a larger `weight` can outweigh a longer idle time. An account that fails is cooled down and skipped while a ready account exists: 24 hours for a rejected or expired token (`A0202`, `A0211`), until the next day once the daily allowance is spent (`-60018`), and briefly for throttling or upstream trouble. When every account is cooling, the pool tries them anyway rather than giving up. Cooldown state is in `~/.docparse/state.json`, keyed by a hash of the credential and never by the credential itself.
 
 A self-hosted or gateway deployment is pointed at with `--base-url`, or with `base_url` on the account. A gateway that needs custom headers declares them in the config file, where `${token}` is substituted:
 
@@ -105,9 +105,9 @@ Every command here also accepts `--output json`.
 | `config set` | Changes one key. | `<key> <value>` | Rejects a key outside the table above with exit 2. |
 | `account list` | Prints the pool, with cooldown state. | | |
 | `account add` | Adds an account. | `--token <token>`, `--name <name>`, `--base-url <url>`, `--weight <n>` | Repeat it to build a pool. Here `--base-url` is written into that account's record, so the account keeps its own upstream; the global flag of the same name covers one call only. |
-| `account remove` | Removes an account. | `<name-or-index>*` | |
+| `account remove` | Removes one account. | `<name-or-index>` | A second name is ignored, so remove them one at a time. |
 | `account test` | Probes credentials without spending allowance. | `--name <name>` | Exit 5 when a credential is rejected. |
-| `quota` | Prints today's pages and files as used over allowance, plus cumulative usage per account. | `--name <name>` | Reads the vendor's own counters. The remaining page count is in `--output json` under `daily.left`. A zero `total_left` means the free balance is spent, which does not block parsing. |
+| `quota` | Prints today's pages and files as used over allowance, plus cumulative usage per account. | `--name <name>` | Reads the vendor's own counters. The remaining page count is under `accounts[].status.daily.left` in `--output json`, not at the top level. The text table's `total_left` column is the cumulative free balance, and a zero there does not block parsing. |
 | `skills status` | Prints the installation state per target. | `--target <list>`, `--skills-root <dir>` | |
 | `skills install`, `skills update` | Copies this skill into the target. | `--target <list>`, `--skills-root <dir>` | |
 | `doctor` | Checks Node, the config file, the pool, upstream reachability, and the skill installation. | `--target <list>`, `--skills-root <dir>` | Exits 3 when a check reports an error. |

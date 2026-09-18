@@ -51,7 +51,7 @@ docparse parse ./report.pdf --token <TOKEN>                   # 仅本次调用
 
 第二种是在调用前把 `DOCPARSE_TOKEN` 设进调用方的环境；调用方借此传入 Token，而不必写进文件。环境变量怎么设是 shell 的事，其余变量见下表。
 
-多配几个账号，调用就会分散到它们上面：优先在途最少的，其次最久未使用的，再看 `weight` 更高的。失败的账号会被冷却并跳过：Token 被拒或过期（`A0202`、`A0211`）冷却 24 小时；当日额度用尽（`-60018`）冷却到次日；限流或上游抖动则短时冷却。冷却状态存在 `~/.docparse/state.json`，以凭证的哈希为键，绝不以凭证本身为键。
+多配几个账号，调用就会分散到它们上面：先取在途最少的，再取「空闲时长 × `weight`」最大的，因此从未用过的账号排最前，权重更大也能盖过更长的空闲。失败的账号会被冷却，在有可用账号时跳过它：Token 被拒或过期（`A0202`、`A0211`）冷却 24 小时；当日额度用尽（`-60018`）冷却到次日；限流或上游抖动则短时冷却。所有账号都在冷却时，账号池宁可试也不放弃。冷却状态存在 `~/.docparse/state.json`，以凭证的哈希为键，绝不以凭证本身为键。
 
 自建或网关部署用 `--base-url` 指定，或在账号上写 `base_url`。需要自定义请求头的网关，在配置文件里声明它，其中 `${token}` 会被替换：
 
@@ -105,9 +105,9 @@ headers = { Authorization = "Bearer ${token}" }
 | `config set` | 修改单个键。 | `<key> <value>` | 键不在上表内时报退出码 2。 |
 | `account list` | 打印账号池与冷却状态。 | | |
 | `account add` | 添加账号。 | `--token <token>`、`--name <name>`、`--base-url <url>`、`--weight <n>` | 多跑几次即可组成账号池。这里的 `--base-url` 会写进该账号的记录，让这个账号长期用自己的上游；同名的全局参数只覆盖一次调用。 |
-| `account remove` | 删除账号。 | `<name-or-index>*` | |
+| `account remove` | 删除一个账号。 | `<name-or-index>` | 再给第二个名字会被忽略，所以要一次删一个。 |
 | `account test` | 探活凭证，不花额度。 | `--name <name>` | 凭证被拒时退出码 5。 |
-| `quota` | 按账号打印今日页数与文件数的「已用/上限」，以及累计用量。 | `--name <name>` | 读的是厂商自己的计数器。剩余页数在 `--output json` 的 `daily.left` 里。`total_left` 为 0 意味着免费额度已用尽，它不阻塞解析。 |
+| `quota` | 按账号打印今日页数与文件数的「已用/上限」，以及累计用量。 | `--name <name>` | 读的是厂商自己的计数器。剩余页数在 `--output json` 的 `accounts[].status.daily.left` 里，不在顶层。文本表格里的 `total_left` 列是累计免费额度，它为 0 不阻塞解析。 |
 | `skills status` | 按目标打印安装状态。 | `--target <list>`、`--skills-root <dir>` | |
 | `skills install`、`skills update` | 把此 skill 复制到目标目录。 | `--target <list>`、`--skills-root <dir>` | |
 | `doctor` | 检查 Node、配置文件、账号池、上游连通性与 skill 安装状态。 | `--target <list>`、`--skills-root <dir>` | 有检查项报错时退出码 3。 |

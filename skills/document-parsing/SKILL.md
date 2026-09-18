@@ -135,12 +135,12 @@ The parsing defaults come from the config: `vlm`, `ch`, OCR off, formula and tab
 
 | Code | Meaning | Action |
 |---|---|---|
-| exit 5 | Every account was rejected, or none is configured. | Verify or replace the credential with `docparse account test`, and add a missing one with `docparse account add`. Retrying the same call changes nothing. |
+| exit 5 | Every account was rejected, or `parse` found none configured. | Verify or replace the credential with `docparse account test`, and add a missing one with `docparse account add`. A missing account is exit 2 for `task`, `batch`, and `quota`; a rejected one is exit 6 for `task` and `batch`. Retrying the same call changes nothing. |
 | exit 6 | The upstream failed, or the wait timed out. | The message carries the vendor's reason, and its code when the vendor sent one. A `task_id` is re-queried with `docparse task <task_id>`, and a `batch_id` with `docparse batch <batch_id>`. Do not resubmit the document. |
 | exit 7 | Some documents succeeded. | The paths already printed stay valid. Re-submit only the inputs that failed. |
 | `-60008` | The vendor could not fetch your URL. | Download the file and pass a local path instead. |
 | `-30001`, `-30003` | The input exceeds a `flash` limit. | Convert that document with `parse`. |
-| `-60018` | The vendor refused the call: the daily page allowance is spent. | The pool parks that account until the next day, so it is not selected again today. Another account still works, and `docparse quota` reports what is left. |
+| `-60018` | The vendor refused the call: the daily page allowance is spent. | The pool cools that account until the next day and prefers another one, but it still tries a cooling account when no other is ready. Another account works at once, and `docparse quota` reports what is left. |
 | any other code | The vendor sent a code the tool carries no hint for. | Keep the message as it is, and do not resubmit the document without a reason. A code that `references/errors.md` lists is not this row's business: that table's retry column governs. The call exits 6. |
 
 The remaining codes, what each means, and which failures are worth retrying are in `references/errors.md`.
