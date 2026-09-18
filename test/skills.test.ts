@@ -258,7 +258,8 @@ describe("解析命令表的自洽", () => {
       const cells = line.split(/(?<!\\)\|/).map((cell) => cell.trim());
       const params = cells[3] ?? "";
       const notes = cells[4] ?? "";
-      for (const [, flag] of notes.matchAll(/`(--[a-z][a-z-]*)/g)) {
+      for (const [, captured] of notes.matchAll(/`(--[a-z][a-z-]*)/g)) {
+        const flag = captured ?? "";
         assert.ok(params.includes(flag), `${line.split("|")[1]?.trim()} 的参数列缺少 ${flag}`);
       }
     }
